@@ -48,7 +48,9 @@ ast_t *charConvertor(char *c)
   }
   if (isnbr(*c))
   {
-    return ast_new_integer((int)(*c));
+    long x;
+    sscanf(c, "%ld", &x);
+    return ast_new_integer(x);
   }
   return NULL;
 }
@@ -56,156 +58,14 @@ ast_t *charConvertor(char *c)
 //compare(a,b) if a > b terurn true else return false
 bool compare(char *a, char *b)
 {
-  //oui je sais dégeulasse mais temporaire
-  if (*a == '+')
-  {
-    if (*b == '+')
-    {
-      return true;
-    }
-    if (*b == '-')
-    {
-      return true;
-    }
-    if (*b == '*')
-    {
-      return false;
-    }
-    if (*b == '/')
-    {
-      return false;
-    }
-    if (*b == '1' || *b == '2' || *b == '3' || *b == '4' || *b == '5')
-    {
-      return false;
-    }
-    if (*b == '\0')
-    {
-      return true;
-    }
-  }
-  if (*a == '-')
-  {
-    if (*b == '+')
-    {
-      return true;
-    }
-    if (*b == '-')
-    {
-      return true;
-    }
-    if (*b == '*')
-    {
-      return false;
-    }
-    if (*b == '/')
-    {
-      return false;
-    }
-    if (*b == '1' || *b == '2' || *b == '3' || *b == '4' || *b == '5')
-    {
-      return false;
-    }
-    if (*b == '\0')
-    {
-      return true;
-    }
-  }
-  if (*a == '*')
-  {
-    if (*b == '+')
-    {
-      return true;
-    }
-    if (*b == '-')
-    {
-      return true;
-    }
-    if (*b == '*')
-    {
-      return true;
-    }
-    if (*b == '/')
-    {
-      return true;
-    }
-    if (*b == '1' || *b == '2' || *b == '3' || *b == '4' || *b == '5')
-    {
-      return false;
-    }
-    if (*b == '\0')
-    {
-      return true;
-    }
-  }
-  if (*a == '/')
-  {
-    if (*b == '+')
-    {
-      return true;
-    }
-    if (*b == '-')
-    {
-      return true;
-    }
-    if (*b == '*')
-    {
-      return true;
-    }
-    if (*b == '/')
-    {
-      return true;
-    }
-    if (*b == '1' || *b == '2' || *b == '3' || *b == '4' || *b == '5')
-    {
-      return false;
-    }
-    if (*b == '\0')
-    {
-      return true;
-    }
-  }
-  if (*a == '1' || *a == '2' || *a == '3' || *a == '4' || *a == '5')
-  {
-    if (*b == '+')
-    {
-      return true;
-    }
-    if (*b == '-')
-    {
-      return true;
-    }
-    if (*b == '*')
-    {
-      return true;
-    }
-    if (*b == '/')
-    {
-      return true;
-    }
-    if (*b == '1' || *b == '2' || *b == '3' || *b == '4' || *b == '5')
-    {
-      printf("error !!!! \n");
-      exit(1);
-    }
-    if (*b == '\0')
-    {
-      return true;
-    }
-  }
-  if (*a == '\0')
-  {
-    return false;
-  }
-
-  printf("somthing went wrong\n");
-  printf("a = '%c' and b = '%c'\n", *a, *b);
-  exit(1);
+  if (ast_binary_priority((ast_t*)charConvertor(a)) > ast_binary_priority((ast_t*)charConvertor(b)))
+    return true;
+  return false;
 }
 
 mystack_t deal_with_equations()
 {
-  char string[] = "1+2*3-4+5"; // temporaire juste pour voir si ça marche
+  char string[] = "1+2*3-4+5"; // temporary setup
   mystack_t stack = NULL;
   mystack_t exit = NULL;
 
@@ -371,17 +231,17 @@ ast_t *parse_expression(buffer_t *buffer)
     {
       // retourner sortie
       printf("returning result\n");
-      return exit;
+      return exit; //covert to ast_t ??
     }
     // sinon
     else
     {
       // soient a le symbole en sommet de pile et b le symbole pointé par i
-      char *a = stack_top(stack);
-      char *b = buf_getchar_rollback(buffer);
+      char *a = (char *)stack_top(stack);
+      char *b = (char *)buf_getchar_rollback(buffer);
       bool comparaison = false;
       if (stack_top(stack))
-        comparaison = compare(a, b);
+        comparaison = compare(a, b); //check if stack_top != (nil)
 
       // si a a une priorité plus basse que b
       if (!comparaison)
@@ -536,10 +396,6 @@ ast_list_t *parse(buffer_t *buffer)
 
   ast_t *sortie = pile_vers_arbre(&stack);
   ast_print(sortie);
-
-  if (DEBUG)
-    printf("** end of file. **\n");
-  return NULL;
 
   ast_t *function = parse_function(buffer);
   ast_print(function);
