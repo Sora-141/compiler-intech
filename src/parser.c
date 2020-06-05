@@ -218,7 +218,7 @@ ast_t *parse_expression(buffer_t *buffer)
   buf_skipblank(buffer);
 
   // empiler le caractère nul dans pile
-  stack_push(&stack, (char *)'\0');
+  stack_push(&stack, NULL);
 
   // répéter indéfiniment:
   for (;;)
@@ -227,11 +227,11 @@ ast_t *parse_expression(buffer_t *buffer)
     char topStack = '\0';
     if (stack_top(stack))
       topStack = *(char *)stack_top(stack);
-    if ((buf_getchar_rollback(buffer) == '\0' && topStack == '\0') || (buf_getchar_rollback(buffer) == ';') || (buf_getchar_rollback(buffer) == ' ' && topStack == '\0'))
+    if ((buf_getchar_rollback(buffer) == '\0' && topStack == '\0') || (buf_getchar_rollback(buffer) == ';'))
     {
       // retourner sortie
       printf("returning result\n");
-      return exit; //covert to ast_t ??
+      return pile_vers_arbre(&exit);
     }
     // sinon
     else
